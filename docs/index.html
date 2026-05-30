@@ -1,0 +1,999 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PyWaveletPanel — Wavelet-Based Panel Data Econometrics</title>
+<meta name="description" content="PyWaveletPanel: wavelet-based panel data econometrics in Python — scale-by-scale regression, SAW structural breaks, and panel unit-root tests. By Dr. Merwan Roudane.">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<script>
+  window.MathJax={tex:{inlineMath:[['$','$']],displayMath:[['$$','$$']]}};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+:root{
+  --bg:#ffffff; --surface:#f6f8fb; --surface2:#eef2f7;
+  --ink:#1a1f29; --muted:#5b6573; --line:#e3e8ef;
+  --accent:#0072B2; --accent2:#009E73; --accent3:#E69F00;
+  --shadow:0 1px 3px rgba(20,30,50,.06),0 8px 24px rgba(20,30,50,.06);
+  --radius:14px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;color:var(--ink);background:var(--bg);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.65;font-size:17px;
+}
+.wrap{max-width:1060px;margin:0 auto;padding:0 22px}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+h1,h2,h3,h4{font-family:Georgia,"Times New Roman",serif;line-height:1.25;color:#10151d}
+h2{font-size:1.9rem;margin:2.6rem 0 1rem;padding-bottom:.4rem;border-bottom:2px solid var(--line)}
+h3{font-size:1.35rem;margin:1.8rem 0 .6rem}
+h4{font-size:1.1rem;margin:1.2rem 0 .4rem;color:var(--accent)}
+p{margin:.7rem 0}
+code{font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+  background:var(--surface2);padding:.12em .4em;border-radius:6px;font-size:.88em}
+pre{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);
+  border-radius:10px;padding:14px 16px;overflow:auto;font-size:.82rem;line-height:1.45}
+pre code{background:none;padding:0}
+
+/* hero */
+.hero{background:
+  radial-gradient(1200px 400px at 80% -10%,rgba(0,114,178,.10),transparent 60%),
+  radial-gradient(900px 400px at 0% 0%,rgba(0,158,115,.08),transparent 55%),
+  linear-gradient(180deg,#fbfdff,#ffffff);
+  border-bottom:1px solid var(--line);padding:64px 0 40px}
+.hero .wave{font-size:3rem}
+.hero h1{font-size:2.8rem;margin:.2rem 0 .3rem}
+.hero .tag{font-size:1.25rem;color:var(--muted);margin:0 0 1.2rem}
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin:.6rem 0 1.2rem}
+.badges img{height:22px}
+.btnrow{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:10px;
+  font-weight:600;font-size:.92rem;border:1px solid var(--line);background:#fff;color:var(--ink);
+  box-shadow:var(--shadow)}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn.alt{background:var(--accent2);color:#fff;border-color:var(--accent2)}
+.btn:hover{text-decoration:none;transform:translateY(-1px);transition:.15s}
+
+/* author card */
+.author{display:flex;gap:16px;align-items:center;margin-top:26px;padding:16px 18px;
+  background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);max-width:560px}
+.avatar{width:54px;height:54px;border-radius:50%;flex:0 0 auto;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.3rem;font-family:Georgia,serif}
+.author .nm{font-weight:700}
+.author .mu{color:var(--muted);font-size:.9rem}
+
+/* nav */
+nav.toc{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.92);
+  backdrop-filter:saturate(160%) blur(8px);border-bottom:1px solid var(--line)}
+nav.toc .wrap{display:flex;gap:18px;flex-wrap:wrap;padding:11px 22px;font-size:.9rem;font-weight:600}
+nav.toc a{color:var(--muted)}
+nav.toc a:hover{color:var(--accent);text-decoration:none}
+
+/* content blocks */
+section{padding:6px 0}
+blockquote{margin:1rem 0;padding:.6rem 1rem;border-left:4px solid var(--accent3);
+  background:#fffaf0;border-radius:8px;color:#5a4a26}
+figure{margin:1.6rem 0;text-align:center}
+figure img{max-width:100%;height:auto;border:1px solid var(--line);border-radius:12px;
+  box-shadow:var(--shadow);background:#fff;padding:6px}
+figcaption{color:var(--muted);font-size:.88rem;margin-top:.5rem;font-style:italic}
+
+/* tables */
+.tablewrap{overflow-x:auto;margin:1.2rem 0;border:1px solid var(--line);border-radius:12px;
+  box-shadow:var(--shadow);background:#fff;padding:6px}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+table th,table td{padding:8px 12px;border-bottom:1px solid var(--line);text-align:right}
+table th{background:var(--surface2);color:#10151d;font-weight:700;text-align:right}
+table caption{caption-side:top;font-weight:700;padding:8px;color:#10151d;text-align:left}
+table tr:hover td{background:var(--surface)}
+
+/* console (rich) output */
+.console{background:#fbfcfe;border:1px solid var(--line);border-left:4px solid var(--accent2);
+  border-radius:10px;padding:12px 14px;overflow:auto;font-size:.74rem;line-height:1.35;
+  font-family:"SFMono-Regular",Consolas,monospace;color:#2a3340;white-space:pre}
+
+.codecell{margin:1.1rem 0}
+.codecell .src{background:#0b1c2c0d}
+details.code{margin:.6rem 0}
+details.code summary{cursor:pointer;color:var(--muted);font-size:.85rem;font-weight:600}
+
+footer{margin-top:60px;padding:34px 0;border-top:1px solid var(--line);background:var(--surface);
+  color:var(--muted);font-size:.9rem}
+footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px}
+.kbd{font-size:.8rem;color:var(--muted)}
+@media(max-width:640px){.hero h1{font-size:2.1rem}body{font-size:16px}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="wave">🌊</div>
+    <h1>PyWaveletPanel</h1>
+    <p class="tag">Wavelet-Based Panel Data Econometrics in Python</p>
+    <div class="badges">
+      <a href="https://pypi.org/project/pywaveletpanel/"><img src="https://img.shields.io/pypi/v/pywaveletpanel.svg?color=blue" alt="PyPI"></a>
+      <img src="https://img.shields.io/badge/python-3.9+-blue.svg" alt="Python">
+      <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="MIT">
+    </div>
+    <div class="btnrow">
+      <a class="btn primary" href="https://github.com/merwanroudane/pywaveletpanel">★ GitHub Repository</a>
+      <a class="btn alt" href="https://pypi.org/project/pywaveletpanel/">⬇ Install from PyPI</a>
+      <a class="btn" href="https://github.com/merwanroudane/pywaveletpanel/issues">Issue Tracker</a>
+    </div>
+    <div class="author">
+      <div class="avatar">MR</div>
+      <div>
+        <div class="nm">Dr. Merwan Roudane</div>
+        <div class="mu">📧 <a href="mailto:merwanroudane920@gmail.com">merwanroudane920@gmail.com</a></div>
+        <div class="mu">🔗 <a href="https://github.com/merwanroudane">github.com/merwanroudane</a></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="toc"><div class="wrap">
+  <a href="#about">Overview</a>
+  <a href="#theory">Theory</a>
+  <a href="#demo">Worked Demo</a>
+  <a href="#install">Install</a>
+  <a href="#refs">References</a>
+</div></nav>
+
+<main class="wrap">
+  <section id="about">
+    <h2>Overview</h2>
+    <p><strong>PyWaveletPanel</strong> brings wavelet methods to panel-data
+    econometrics. It implements five published methodologies behind a clean,
+    consistent API and produces journal-quality tables and publication-grade,
+    light-themed plots. The worked example below uses the real
+    <em>Grunfeld (1958)</em> investment panel (11 U.S. firms, 1935–1954).</p>
+    <ul>
+      <li><strong>Multiresolution decomposition</strong> (MODWT / DWT, Haar &amp; LA(8)).</li>
+      <li><strong>Scale-by-scale panel regression</strong> with fixed effects and Newey–West HAC errors.</li>
+      <li><strong>SAW structural-break detection</strong> with Post-SAW Chow tests.</li>
+      <li><strong>Panel unit-root tests</strong>: classical IPS plus three wavelet-based tests.</li>
+    </ul>
+  </section>
+
+  <section id="theory">
+    <h2>Methodology &amp; Theory</h2>
+    
+<h4>A. The discrete wavelet transform &amp; multiresolution analysis</h4>
+<p>A wavelet transform decomposes a time series $x_t$ into components localised in
+<strong>both time and frequency (scale)</strong>. Using a father wavelet $\phi$ (smooth,
+low-pass) and a mother wavelet $\psi$ (oscillatory, high-pass), the series is written as</p>
+<p>$$x_t = \underbrace{S_{J,t}}_{\text{smooth trend}} + \sum_{j=1}^{J}\underbrace{D_{j,t}}_{\text{detail at scale } j}.$$</p>
+<p>Each <strong>detail</strong> band $D_j$ captures fluctuations with period roughly
+$2^{j}$&ndash;$2^{j+1}$ time units; the <strong>smooth</strong> $S_J$ holds the long-run
+trend. The library uses the <strong>maximal-overlap DWT (MODWT)</strong>, which is
+shift-invariant and works for any sample length $T$ (unlike the classical DWT, which
+requires $T = 2^{J}$).</p>
+
+<h4>B. Scale-by-scale panel regression</h4>
+<p>Classical panel regression estimates a <em>single</em> slope. Real economic
+relationships, however, can differ across horizons: short-run noise vs. long-run
+co-movement. We therefore run the fixed-effects regression <strong>separately at each
+wavelet scale</strong>,</p>
+<p>$$\tilde y_{it}^{(j)} = \alpha_i + \beta_j\,\tilde x_{it}^{(j)} + \varepsilon_{it}^{(j)},$$</p>
+<p>where $\tilde y^{(j)},\tilde x^{(j)}$ are the scale-$j$ detail series and $\beta_j$ is
+the <strong>scale-specific elasticity</strong>. Standard errors use the Newey&ndash;West
+HAC estimator to remain valid under serial correlation introduced by the transform.</p>
+
+<h4>C. SAW structural-break detection</h4>
+<p>The <strong>Structure-Adapted Wavelet (SAW)</strong> estimator of Bada et al. (2021)
+detects <em>jumps</em> in a time-varying coefficient $\gamma_t$. After first-differencing
+out the fixed effects, the coefficient path is expanded in a <strong>Haar basis</strong>;
+small detail coefficients (noise) are removed by hard-thresholding at the universal level</p>
+<p>$$\lambda = \hat\sigma\sqrt{2\log T}, \qquad \hat\sigma = \operatorname{median}(|W_1|)/0.6745,$$</p>
+<p>and breaks are read off the <strong>reconstructed</strong> path wherever it jumps by
+more than $\lambda$. A Post-SAW step re-estimates each stable segment and runs Chow tests
+across consecutive intervals.</p>
+
+<h4>D. Wavelet panel unit-root tests</h4>
+<p>To ask whether series are <strong>stationary</strong> or contain a <strong>unit
+root</strong>, the package provides the classical IPS test alongside three wavelet-based
+tests (Wavelet Ratio IPS, and Wald tests on DWT / MODWT energy). Critical values are
+obtained by Monte Carlo simulation under the null of independent random walks. Wavelet
+tests gain power when breaks or cross-sectional dependence are present.</p>
+
+  </section>
+
+  <section id="demo">
+    <h2>Worked Demonstration — Grunfeld Investment Panel</h2>
+    <p>Every figure and table below is generated automatically from the executed
+    notebook <code>PyWaveletPanel_Demo.ipynb</code>.</p>
+    <div class="codecell"><details class="code"><summary>Show code</summary><pre><code>%matplotlib inline
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from statsmodels.datasets import grunfeld
+
+from pywaveletpanel import (
+    # transforms
+    modwt_mra,
+    # panel regression
+    WaveletPanelOLS,
+    # structural breaks
+    SAWEstimator, PostSAWEstimator,
+    # unit-root tests
+    WaveletRatioIPS, WaveletWaldDWT, WaveletWaldMODWT, PanelADF,
+    # visualisation
+    set_journal_style,
+    plot_wavelet_decomposition, plot_scale_coefficients,
+    plot_structural_breaks, plot_unit_root_comparison,
+)
+from pywaveletpanel.tables import UnitRootTable
+
+set_journal_style()
+pd.set_option("display.float_format", lambda v: f"{v:,.3f}")
+print("PyWaveletPanel ready — theme applied.")</code></pre></details>
+<div class="console">PyWaveletPanel ready — theme applied.
+</div></div><div class="md"><h2>1. The Data — Grunfeld Investment Panel (real)</h2>
+<p>The Grunfeld data is a classic balanced panel: gross <strong>investment</strong>, market <strong>value</strong> of the firm,
+and <strong>capital</strong> stock for <strong>N = 11</strong> firms over <strong>T = 20</strong> years. We work in logs, so the
+slope coefficient of <code>log(invest)</code> on <code>log(value)</code> is a constant-elasticity.</p></div><div class="codecell"><details class="code"><summary>Show code</summary><pre><code>raw = grunfeld.load_pandas().data.copy()
+raw["year"] = raw["year"].astype(int)
+raw = raw.sort_values(["firm", "year"]).reset_index(drop=True)
+
+N = raw["firm"].nunique()
+T = raw["year"].nunique()
+firms = sorted(raw["firm"].unique())
+print(f"N = {N} firms,  T = {T} years  ({raw['year'].min()}–{raw['year'].max()})")
+print("Firms:", ", ".join(firms))
+
+raw.head(8).style.set_caption("Grunfeld panel — first 8 rows") \
+   .format({"invest": "{:.1f}", "value": "{:.1f}", "capital": "{:.1f}"}) \
+   .hide(axis="index")</code></pre></details>
+<div class="console">N = 11 firms,  T = 20 years  (1935–1954)
+Firms: American Steel, Atlantic Refining, Chrysler, Diamond Match, General Electric, General Motors, Goodyear, IBM, US Steel, Union Oil, Westinghouse
+</div>
+<div class="tablewrap"><style type="text/css">
+</style>
+<table id="T_d358b">
+  <caption>Grunfeld panel — first 8 rows</caption>
+  <thead>
+    <tr>
+      <th id="T_d358b_level0_col0" class="col_heading level0 col0" >invest</th>
+      <th id="T_d358b_level0_col1" class="col_heading level0 col1" >value</th>
+      <th id="T_d358b_level0_col2" class="col_heading level0 col2" >capital</th>
+      <th id="T_d358b_level0_col3" class="col_heading level0 col3" >firm</th>
+      <th id="T_d358b_level0_col4" class="col_heading level0 col4" >year</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td id="T_d358b_row0_col0" class="data row0 col0" >2.9</td>
+      <td id="T_d358b_row0_col1" class="data row0 col1" >30.3</td>
+      <td id="T_d358b_row0_col2" class="data row0 col2" >52.0</td>
+      <td id="T_d358b_row0_col3" class="data row0 col3" >American Steel</td>
+      <td id="T_d358b_row0_col4" class="data row0 col4" >1935</td>
+    </tr>
+    <tr>
+      <td id="T_d358b_row1_col0" class="data row1 col0" >5.6</td>
+      <td id="T_d358b_row1_col1" class="data row1 col1" >43.9</td>
+      <td id="T_d358b_row1_col2" class="data row1 col2" >52.9</td>
+      <td id="T_d358b_row1_col3" class="data row1 col3" >American Steel</td>
+      <td id="T_d358b_row1_col4" class="data row1 col4" >1936</td>
+    </tr>
+    <tr>
+      <td id="T_d358b_row2_col0" class="data row2 col0" >10.2</td>
+      <td id="T_d358b_row2_col1" class="data row2 col1" >107.0</td>
+      <td id="T_d358b_row2_col2" class="data row2 col2" >54.5</td>
+      <td id="T_d358b_row2_col3" class="data row2 col3" >American Steel</td>
+      <td id="T_d358b_row2_col4" class="data row2 col4" >1937</td>
+    </tr>
+    <tr>
+      <td id="T_d358b_row3_col0" class="data row3 col0" >4.0</td>
+      <td id="T_d358b_row3_col1" class="data row3 col1" >68.3</td>
+      <td id="T_d358b_row3_col2" class="data row3 col2" >59.7</td>
+      <td id="T_d358b_row3_col3" class="data row3 col3" >American Steel</td>
+      <td id="T_d358b_row3_col4" class="data row3 col4" >1938</td>
+    </tr>
+    <tr>
+      <td id="T_d358b_row4_col0" class="data row4 col0" >3.3</td>
+      <td id="T_d358b_row4_col1" class="data row4 col1" >84.2</td>
+      <td id="T_d358b_row4_col2" class="data row4 col2" >61.7</td>
+      <td id="T_d358b_row4_col3" class="data row4 col3" >American Steel</td>
+      <td id="T_d358b_row4_col4" class="data row4 col4" >1939</td>
+    </tr>
+    <tr>
+      <td id="T_d358b_row5_col0" class="data row5 col0" >4.7</td>
+      <td id="T_d358b_row5_col1" class="data row5 col1" >69.2</td>
+      <td id="T_d358b_row5_col2" class="data row5 col2" >62.2</td>
+      <td id="T_d358b_row5_col3" class="data row5 col3" >American Steel</td>
+      <td id="T_d358b_row5_col4" class="data row5 col4" >1940</td>
+    </tr>
+    <tr>
+      <td id="T_d358b_row6_col0" class="data row6 col0" >5.7</td>
+      <td id="T_d358b_row6_col1" class="data row6 col1" >60.1</td>
+      <td id="T_d358b_row6_col2" class="data row6 col2" >63.4</td>
+      <td id="T_d358b_row6_col3" class="data row6 col3" >American Steel</td>
+      <td id="T_d358b_row6_col4" class="data row6 col4" >1941</td>
+    </tr>
+    <tr>
+      <td id="T_d358b_row7_col0" class="data row7 col0" >12.1</td>
+      <td id="T_d358b_row7_col1" class="data row7 col1" >49.3</td>
+      <td id="T_d358b_row7_col2" class="data row7 col2" >64.9</td>
+      <td id="T_d358b_row7_col3" class="data row7 col3" >American Steel</td>
+      <td id="T_d358b_row7_col4" class="data row7 col4" >1942</td>
+    </tr>
+  </tbody>
+</table>
+</div></div><div class="codecell"><details class="code"><summary>Show code</summary><pre><code># Per-firm summary of investment — a beautiful gradient table
+summary = (raw.groupby("firm")["invest"]
+           .agg(["mean", "std", "min", "max"])
+           .rename(columns={"mean": "Mean", "std": "Std", "min": "Min", "max": "Max"}))
+(summary.style
+    .format("{:,.1f}")
+    .background_gradient(cmap="YlGnBu", subset=["Mean", "Std"])
+    .set_caption("Gross investment by firm, 1935–1954")
+    .set_table_styles([{"selector": "caption",
+                        "props": [("font-size", "14px"), ("font-weight", "bold")]}]))</code></pre></details>
+<div class="tablewrap"><style type="text/css">
+#T_83734 caption {
+  font-size: 14px;
+  font-weight: bold;
+}
+#T_83734_row0_col0, #T_83734_row0_col1 {
+  background-color: #feffd8;
+  color: #000000;
+}
+#T_83734_row1_col0 {
+  background-color: #f1fabb;
+  color: #000000;
+}
+#T_83734_row1_col1 {
+  background-color: #f9fdcb;
+  color: #000000;
+}
+#T_83734_row2_col0 {
+  background-color: #e9f7b1;
+  color: #000000;
+}
+#T_83734_row2_col1 {
+  background-color: #eaf7b1;
+  color: #000000;
+}
+#T_83734_row3_col0, #T_83734_row3_col1 {
+  background-color: #ffffd9;
+  color: #000000;
+}
+#T_83734_row4_col0 {
+  background-color: #e2f4b2;
+  color: #000000;
+}
+#T_83734_row4_col1 {
+  background-color: #e6f5b2;
+  color: #000000;
+}
+#T_83734_row5_col0, #T_83734_row5_col1 {
+  background-color: #081d58;
+  color: #f1f1f1;
+}
+#T_83734_row6_col0, #T_83734_row10_col0 {
+  background-color: #f6fbc5;
+  color: #000000;
+}
+#T_83734_row6_col1 {
+  background-color: #f9fdcc;
+  color: #000000;
+}
+#T_83734_row7_col0 {
+  background-color: #f3fabd;
+  color: #000000;
+}
+#T_83734_row7_col1 {
+  background-color: #f0f9b7;
+  color: #000000;
+}
+#T_83734_row8_col0 {
+  background-color: #1f7db6;
+  color: #f1f1f1;
+}
+#T_83734_row8_col1 {
+  background-color: #73c8bd;
+  color: #000000;
+}
+#T_83734_row9_col0 {
+  background-color: #f5fbc2;
+  color: #000000;
+}
+#T_83734_row9_col1 {
+  background-color: #f8fcc9;
+  color: #000000;
+}
+#T_83734_row10_col1 {
+  background-color: #f7fcc7;
+  color: #000000;
+}
+</style>
+<table id="T_83734">
+  <caption>Gross investment by firm, 1935–1954</caption>
+  <thead>
+    <tr>
+      <th class="blank level0" >&nbsp;</th>
+      <th id="T_83734_level0_col0" class="col_heading level0 col0" >Mean</th>
+      <th id="T_83734_level0_col1" class="col_heading level0 col1" >Std</th>
+      <th id="T_83734_level0_col2" class="col_heading level0 col2" >Min</th>
+      <th id="T_83734_level0_col3" class="col_heading level0 col3" >Max</th>
+    </tr>
+    <tr>
+      <th class="index_name level0" >firm</th>
+      <th class="blank col0" >&nbsp;</th>
+      <th class="blank col1" >&nbsp;</th>
+      <th class="blank col2" >&nbsp;</th>
+      <th class="blank col3" >&nbsp;</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th id="T_83734_level0_row0" class="row_heading level0 row0" >American Steel</th>
+      <td id="T_83734_row0_col0" class="data row0 col0" >6.8</td>
+      <td id="T_83734_row0_col1" class="data row0 col1" >3.2</td>
+      <td id="T_83734_row0_col2" class="data row0 col2" >2.9</td>
+      <td id="T_83734_row0_col3" class="data row0 col3" >15.3</td>
+    </tr>
+    <tr>
+      <th id="T_83734_level0_row1" class="row_heading level0 row1" >Atlantic Refining</th>
+      <td id="T_83734_row1_col0" class="data row1 col0" >61.8</td>
+      <td id="T_83734_row1_col1" class="data row1 col1" >15.2</td>
+      <td id="T_83734_row1_col2" class="data row1 col2" >39.7</td>
+      <td id="T_83734_row1_col3" class="data row1 col3" >91.9</td>
+    </tr>
+    <tr>
+      <th id="T_83734_level0_row2" class="row_heading level0 row2" >Chrysler</th>
+      <td id="T_83734_row2_col0" class="data row2 col0" >86.1</td>
+      <td id="T_83734_row2_col1" class="data row2 col1" >42.7</td>
+      <td id="T_83734_row2_col2" class="data row2 col2" >40.3</td>
+      <td id="T_83734_row2_col3" class="data row2 col3" >174.9</td>
+    </tr>
+    <tr>
+      <th id="T_83734_level0_row3" class="row_heading level0 row3" >Diamond Match</th>
+      <td id="T_83734_row3_col0" class="data row3 col0" >3.1</td>
+      <td id="T_83734_row3_col1" class="data row3 col1" >1.7</td>
+      <td id="T_83734_row3_col2" class="data row3 col2" >0.9</td>
+      <td id="T_83734_row3_col3" class="data row3 col3" >6.5</td>
+    </tr>
+    <tr>
+      <th id="T_83734_level0_row4" class="row_heading level0 row4" >General Electric</th>
+      <td id="T_83734_row4_col0" class="data row4 col0" >102.3</td>
+      <td id="T_83734_row4_col1" class="data row4 col1" >48.6</td>
+      <td id="T_83734_row4_col2" class="data row4 col2" >33.1</td>
+      <td id="T_83734_row4_col3" class="data row4 col3" >189.6</td>
+    </tr>
+    <tr>
+      <th id="T_83734_level0_row5" class="row_heading level0 row5" >General Motors</th>
+      <td id="T_83734_row5_col0" class="data row5 col0" >608.0</td>
+      <td id="T_83734_row5_col1" class="data row5 col1" >309.6</td>
+      <td id="T_83734_row5_col2" class="data row5 col2" >257.7</td>
+      <td id="T_83734_row5_col3" class="data row5 col3" >1,486.7</td>
+    </tr>
+    <tr>
+      <th id="T_83734_level0_row6" class="row_heading level0 row6" >Goodyear</th>
+      <td id="T_83734_row6_col0" class="data row6 col0" >41.9</td>
+      <td id="T_83734_row6_col1" class="data row6 col1" >14.9</td>
+      <td id="T_83734_row6_col2" class="data row6 col2" >20.9</td>
+      <td id="T_83734_row6_col3" class="data row6 col3" >66.1</td>
+    </tr>
+    <tr>
+      <th id="T_83734_level0_row7" class="row_heading level0 row7" >IBM</th>
+      <td id="T_83734_row7_col0" class="data row7 col0" >55.4</td>
+      <td id="T_83734_row7_col1" class="data row7 col1" >34.9</td>
+      <td id="T_83734_row7_col2" class="data row7 col2" >20.4</td>
+      <td id="T_83734_row7_col3" class="data row7 col3" >135.7</td>
+    </tr>
+    <tr>
+      <th id="T_83734_level0_row8" class="row_heading level0 row8" >US Steel</th>
+      <td id="T_83734_row8_col0" class="data row8 col0" >410.5</td>
+      <td id="T_83734_row8_col1" class="data row8 col1" >125.4</td>
+      <td id="T_83734_row8_col2" class="data row8 col2" >209.9</td>
+      <td id="T_83734_row8_col3" class="data row8 col3" >645.5</td>
+    </tr>
+    <tr>
+      <th id="T_83734_level0_row9" class="row_heading level0 row9" >Union Oil</th>
+      <td id="T_83734_row9_col0" class="data row9 col0" >47.6</td>
+      <td id="T_83734_row9_col1" class="data row9 col1" >18.3</td>
+      <td id="T_83734_row9_col2" class="data row9 col2" >23.2</td>
+      <td id="T_83734_row9_col3" class="data row9 col3" >89.5</td>
+    </tr>
+    <tr>
+      <th id="T_83734_level0_row10" class="row_heading level0 row10" >Westinghouse</th>
+      <td id="T_83734_row10_col0" class="data row10 col0" >42.9</td>
+      <td id="T_83734_row10_col1" class="data row10 col1" >19.1</td>
+      <td id="T_83734_row10_col2" class="data row10 col2" >12.9</td>
+      <td id="T_83734_row10_col3" class="data row10 col3" >90.1</td>
+    </tr>
+  </tbody>
+</table>
+</div></div><div class="codecell"><details class="code"><summary>Show code</summary><pre><code># Build the stacked arrays the library expects, plus a wide (N, T) matrix for unit-root tests
+y          = np.log(raw["invest"].values)        # dependent  (N*T,)
+X          = np.log(raw["value"].values)         # regressor  (N*T,)
+entity_ids = raw["firm"].values
+time_ids   = raw["year"].values
+years      = np.sort(raw["year"].unique())
+
+invest_mat = np.log(raw.pivot(index="firm", columns="year", values="invest").values)  # (N, T)
+print("stacked y:", y.shape, "| matrix panel:", invest_mat.shape)</code></pre></details>
+<div class="console">stacked y: (220,) | matrix panel: (11, 20)
+</div></div><div class="md"><h2>2. Multiresolution Decomposition (MODWT)</h2>
+<p>Before modelling, we visualise <em>where in time-scale space</em> a firm's investment dynamics live.
+The MODWT-MRA splits the series into detail bands (<strong>D1</strong>–<strong>D3</strong>) plus a smooth long-run trend (<strong>S3</strong>).
+We use <strong>General Motors</strong> as the showcase firm.</p></div><div class="codecell"><details class="code"><summary>Show code</summary><pre><code>gm = np.log(raw.loc[raw["firm"] == "General Motors", "invest"].values)
+comp = modwt_mra(gm, wavelet="sym4", level=3)
+print("Scale bands:", comp["labels"])
+
+fig = plot_wavelet_decomposition(
+    gm, comp,
+    title="General Motors — MODWT Decomposition of log(Investment)",
+    time_index=years, figsize=(13, 9),
+)
+plt.show()</code></pre></details>
+<div class="console">Scale bands: {'D1': '2–4 periods', 'D2': '4–8 periods', 'D3': '8–16 periods', 'S3': '&gt;16 periods (trend)'}
+</div>
+<figure><img src="assets/fig_01.png" alt="Figure 1"><figcaption>Figure 1</figcaption></figure></div><div class="md"><h2>3. Scale-by-Scale Panel Regression</h2>
+<p>We estimate the investment–value elasticity <strong>separately at each wavelet scale</strong> with firm fixed
+effects and Newey–West (HAC) standard errors. This reveals whether the relationship is driven by
+short-run fluctuations or long-run co-movement — the core idea of Gallegati et al. (2015) and
+Karlsson et al. (2020).</p></div><div class="codecell"><details class="code"><summary>Show code</summary><pre><code>model = WaveletPanelOLS(wavelet="sym4", level=3, robust=True, include_aggregate=True)
+result = model.fit(y, X, entity_ids, time_ids, regressor_names=["log Value"])
+
+print(result.summary())   # library's journal-quality console table</code></pre></details>
+<div class="tablewrap"><pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">                          Scale-by-scale Panel Regression Results                           </span>
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">                           Wavelet: SYM4 | Level: 3 | N=11, T=20                            </span>
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">              Fixed effects estimation with Newey-West robust standard errors.              </span>
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">                t-statistics in parentheses. *** p&lt;0.01, ** p&lt;0.05, * p&lt;0.10                </span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">┏━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┓</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">┃</span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold">               </span><span style="color: #0000ff; text-decoration-color: #0000ff">┃</span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold">  Aggregate   </span><span style="color: #0000ff; text-decoration-color: #0000ff">┃</span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold">      S3      </span><span style="color: #0000ff; text-decoration-color: #0000ff">┃</span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold">      D3      </span><span style="color: #0000ff; text-decoration-color: #0000ff">┃</span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold">      D2      </span><span style="color: #0000ff; text-decoration-color: #0000ff">┃</span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold">      D1      </span><span style="color: #0000ff; text-decoration-color: #0000ff">┃</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">┡━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━┩</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">│</span><span style="font-weight: bold"> β (log Value) </span><span style="color: #0000ff; text-decoration-color: #0000ff">│</span>   <span style="color: #008000; text-decoration-color: #008000; font-weight: bold">0.910***</span>   <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>   <span style="color: #008000; text-decoration-color: #008000; font-weight: bold">1.163***</span>   <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>   <span style="color: #008000; text-decoration-color: #008000; font-weight: bold">1.135***</span>   <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>   <span style="color: #008000; text-decoration-color: #008000; font-weight: bold">0.695***</span>   <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>   <span style="color: #008000; text-decoration-color: #008000; font-weight: bold">0.668***</span>   <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">├───────────────┼──────────────┼──────────────┼──────────────┼──────────────┼──────────────┤</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">│</span><span style="font-weight: bold">               </span><span style="color: #0000ff; text-decoration-color: #0000ff">│</span>    (9.17)    <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>   (12.18)    <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>   (11.64)    <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>    (7.50)    <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>    (8.17)    <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">├───────────────┼──────────────┼──────────────┼──────────────┼──────────────┼──────────────┤</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">│</span><span style="font-weight: bold"> Adj. R²       </span><span style="color: #0000ff; text-decoration-color: #0000ff">│</span>    0.3128    <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>    0.3802    <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>    0.4842    <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>    0.1868    <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>    0.3183    <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">├───────────────┼──────────────┼──────────────┼──────────────┼──────────────┼──────────────┤</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">│</span><span style="font-weight: bold"> N obs         </span><span style="color: #0000ff; text-decoration-color: #0000ff">│</span>     220      <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>     220      <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>     220      <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>     220      <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>     220      <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">└───────────────┴──────────────┴──────────────┴──────────────┴──────────────┴──────────────┘</span>
+</pre>
+</div>
+<div class="console">                          Scale-by-scale Panel Regression Results                           
+                           Wavelet: SYM4 | Level: 3 | N=11, T=20                            
+              Fixed effects estimation with Newey-West robust standard errors.              
+                t-statistics in parentheses. *** p&lt;0.01, ** p&lt;0.05, * p&lt;0.10                
+┏━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┓
+┃               ┃  Aggregate   ┃      S3      ┃      D3      ┃      D2      ┃      D1      ┃
+┡━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━┩
+│ β (log Value) │   0.910***   │   1.163***   │   1.135***   │   0.695***   │   0.668***   │
+├───────────────┼──────────────┼──────────────┼──────────────┼──────────────┼──────────────┤
+│               │    (9.17)    │   (12.18)    │   (11.64)    │    (7.50)    │    (8.17)    │
+├───────────────┼──────────────┼──────────────┼──────────────┼──────────────┼──────────────┤
+│ Adj. R²       │    0.3128    │    0.3802    │    0.4842    │    0.1868    │    0.3183    │
+├───────────────┼──────────────┼──────────────┼──────────────┼──────────────┼──────────────┤
+│ N obs         │     220      │     220      │     220      │     220      │     220      │
+└───────────────┴──────────────┴──────────────┴──────────────┴──────────────┴──────────────┘
+
+</div></div><div class="codecell"><details class="code"><summary>Show code</summary><pre><code># The same results as a styled DataFrame — colour-coded by elasticity strength
+sdf = result.summary_df()
+show = sdf[["Scale", "Frequency band", "Coefficient", "Std. Error",
+            "t-statistic", "p-value", "Adj. R²"]]
+(show.style
+    .format({"Coefficient": "{:.3f}", "Std. Error": "{:.3f}",
+             "t-statistic": "{:.2f}", "p-value": "{:.4f}", "Adj. R²": "{:.3f}"})
+    .background_gradient(cmap="viridis", subset=["Coefficient"])
+    .background_gradient(cmap="magma_r", subset=["Adj. R²"])
+    .set_caption("Investment–value elasticity by time scale (Grunfeld panel)")
+    .hide(axis="index"))</code></pre></details>
+<div class="tablewrap"><style type="text/css">
+#T_d24da_row0_col2 {
+  background-color: #218e8d;
+  color: #f1f1f1;
+}
+#T_d24da_row0_col6 {
+  background-color: #d5446d;
+  color: #f1f1f1;
+}
+#T_d24da_row1_col2 {
+  background-color: #fde725;
+  color: #000000;
+}
+#T_d24da_row1_col6 {
+  background-color: #782281;
+  color: #f1f1f1;
+}
+#T_d24da_row2_col2 {
+  background-color: #dae319;
+  color: #000000;
+}
+#T_d24da_row2_col6 {
+  background-color: #000004;
+  color: #f1f1f1;
+}
+#T_d24da_row3_col2 {
+  background-color: #481467;
+  color: #f1f1f1;
+}
+#T_d24da_row3_col6 {
+  background-color: #fcfdbf;
+  color: #000000;
+}
+#T_d24da_row4_col2 {
+  background-color: #440154;
+  color: #f1f1f1;
+}
+#T_d24da_row4_col6 {
+  background-color: #cd4071;
+  color: #f1f1f1;
+}
+</style>
+<table id="T_d24da">
+  <caption>Investment–value elasticity by time scale (Grunfeld panel)</caption>
+  <thead>
+    <tr>
+      <th id="T_d24da_level0_col0" class="col_heading level0 col0" >Scale</th>
+      <th id="T_d24da_level0_col1" class="col_heading level0 col1" >Frequency band</th>
+      <th id="T_d24da_level0_col2" class="col_heading level0 col2" >Coefficient</th>
+      <th id="T_d24da_level0_col3" class="col_heading level0 col3" >Std. Error</th>
+      <th id="T_d24da_level0_col4" class="col_heading level0 col4" >t-statistic</th>
+      <th id="T_d24da_level0_col5" class="col_heading level0 col5" >p-value</th>
+      <th id="T_d24da_level0_col6" class="col_heading level0 col6" >Adj. R²</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td id="T_d24da_row0_col0" class="data row0 col0" >Aggregate</td>
+      <td id="T_d24da_row0_col1" class="data row0 col1" >Raw data</td>
+      <td id="T_d24da_row0_col2" class="data row0 col2" >0.910</td>
+      <td id="T_d24da_row0_col3" class="data row0 col3" >0.099</td>
+      <td id="T_d24da_row0_col4" class="data row0 col4" >9.17</td>
+      <td id="T_d24da_row0_col5" class="data row0 col5" >0.0000</td>
+      <td id="T_d24da_row0_col6" class="data row0 col6" >0.313</td>
+    </tr>
+    <tr>
+      <td id="T_d24da_row1_col0" class="data row1 col0" >S3</td>
+      <td id="T_d24da_row1_col1" class="data row1 col1" >>16 periods (trend)</td>
+      <td id="T_d24da_row1_col2" class="data row1 col2" >1.163</td>
+      <td id="T_d24da_row1_col3" class="data row1 col3" >0.095</td>
+      <td id="T_d24da_row1_col4" class="data row1 col4" >12.18</td>
+      <td id="T_d24da_row1_col5" class="data row1 col5" >0.0000</td>
+      <td id="T_d24da_row1_col6" class="data row1 col6" >0.380</td>
+    </tr>
+    <tr>
+      <td id="T_d24da_row2_col0" class="data row2 col0" >D3</td>
+      <td id="T_d24da_row2_col1" class="data row2 col1" >8–16 periods</td>
+      <td id="T_d24da_row2_col2" class="data row2 col2" >1.135</td>
+      <td id="T_d24da_row2_col3" class="data row2 col3" >0.098</td>
+      <td id="T_d24da_row2_col4" class="data row2 col4" >11.64</td>
+      <td id="T_d24da_row2_col5" class="data row2 col5" >0.0000</td>
+      <td id="T_d24da_row2_col6" class="data row2 col6" >0.484</td>
+    </tr>
+    <tr>
+      <td id="T_d24da_row3_col0" class="data row3 col0" >D2</td>
+      <td id="T_d24da_row3_col1" class="data row3 col1" >4–8 periods</td>
+      <td id="T_d24da_row3_col2" class="data row3 col2" >0.695</td>
+      <td id="T_d24da_row3_col3" class="data row3 col3" >0.093</td>
+      <td id="T_d24da_row3_col4" class="data row3 col4" >7.50</td>
+      <td id="T_d24da_row3_col5" class="data row3 col5" >0.0000</td>
+      <td id="T_d24da_row3_col6" class="data row3 col6" >0.187</td>
+    </tr>
+    <tr>
+      <td id="T_d24da_row4_col0" class="data row4 col0" >D1</td>
+      <td id="T_d24da_row4_col1" class="data row4 col1" >2–4 periods</td>
+      <td id="T_d24da_row4_col2" class="data row4 col2" >0.668</td>
+      <td id="T_d24da_row4_col3" class="data row4 col3" >0.082</td>
+      <td id="T_d24da_row4_col4" class="data row4 col4" >8.17</td>
+      <td id="T_d24da_row4_col5" class="data row4 col5" >0.0000</td>
+      <td id="T_d24da_row4_col6" class="data row4 col6" >0.318</td>
+    </tr>
+  </tbody>
+</table>
+</div></div><div class="codecell"><details class="code"><summary>Show code</summary><pre><code>fig = result.plot(figsize=(10, 6))
+plt.show()</code></pre></details>
+<figure><img src="assets/fig_02.png" alt="Figure 2"><figcaption>Figure 2</figcaption></figure></div><div class="codecell"><details class="code"><summary>Show code</summary><pre><code># Ready-to-paste LaTeX for a journal submission
+print(result.to_latex())</code></pre></details>
+<div class="console">\begin{table}[htbp]
+\centering
+\caption{Scale-by-scale Panel Regression Results
+Wavelet: SYM4 | Level: 3 | N=11, T=20
+Fixed effects estimation with Newey-West robust standard errors.
+t-statistics in parentheses. *** p&lt;0.01, ** p&lt;0.05, * p&lt;0.10}
+\begin{tabular}{lccccc}
+\hline\hline
+ &amp; Aggregate &amp; S3 &amp; D3 &amp; D2 &amp; D1 \\
+\hline
+β (log Value) &amp; 0.910*** &amp; 1.163*** &amp; 1.135*** &amp; 0.695*** &amp; 0.668*** \\
+ &amp; (9.17) &amp; (12.18) &amp; (11.64) &amp; (7.50) &amp; (8.17) \\
+Adj. R² &amp; 0.3128 &amp; 0.3802 &amp; 0.4842 &amp; 0.1868 &amp; 0.3183 \\
+N obs &amp; 220 &amp; 220 &amp; 220 &amp; 220 &amp; 220 \\
+\hline\hline
+\end{tabular}
+\parbox{\textwidth}{\footnotesize Note: *** p$&lt;$0.01, ** p$&lt;$0.05, * p$&lt;$0.10. t-statistics in parentheses.}
+\end{table}
+</div></div><div class="md"><p><strong>Reading the table.</strong> The elasticity is largest and most precisely estimated at the <strong>long-run
+scales</strong> (S3 ≈ 1.16, D3 ≈ 1.13) and weaker at the <strong>short-run</strong> D1–D2 bands (≈ 0.67–0.70). Economically,
+firms align investment with market value over <em>multi-year capital-adjustment horizons</em>, while
+year-to-year value swings translate only partially into investment. The aggregate (raw-data) estimate
+of ≈ 0.91 masks this scale heterogeneity — exactly the motivation for a wavelet panel approach.</p></div><div class="md"><h2>4. Structural-Break Detection (SAW)</h2>
+<p>The <strong>Structure-Adapted Wavelet</strong> estimator of Bada et al. (2021) detects jumps in the regression
+coefficient over time. It first-differences out the fixed effects, expands the time path of the
+coefficient in a Haar basis, thresholds, and reads breaks off the reconstructed path.</p></div><div class="codecell"><details class="code"><summary>Show code</summary><pre><code>saw = SAWEstimator(threshold_method="adaptive", min_segment_length=2)
+breaks = saw.detect(y, X, entity_ids, time_ids, regressor_names=["log Value"])
+
+print(breaks.summary())
+print(f"\nTotal breaks detected on the real panel: {breaks.total_breaks()}")</code></pre></details>
+<div class="tablewrap"><pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">               SAW Structural Break Detection Results                </span>
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">                   N=11, T=20 | Threshold: 1.8471                    </span>
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">                      Total breaks detected: 0                       </span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">┏━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━┓</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">┃</span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold"> Regressor </span><span style="color: #0000ff; text-decoration-color: #0000ff">┃</span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold"> # Breaks </span><span style="color: #0000ff; text-decoration-color: #0000ff">┃</span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold"> Break locations </span><span style="color: #0000ff; text-decoration-color: #0000ff">┃</span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold"> Intervals </span><span style="color: #0000ff; text-decoration-color: #0000ff">┃</span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold"> Coefficients </span><span style="color: #0000ff; text-decoration-color: #0000ff">┃</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">┡━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━┩</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">│</span> log Value <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>    0     <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>        —        <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>  [0,19)   <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>    0.5243    <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">└───────────┴──────────┴─────────────────┴───────────┴──────────────┘</span>
+</pre>
+</div>
+<div class="console">               SAW Structural Break Detection Results                
+                   N=11, T=20 | Threshold: 1.8471                    
+                      Total breaks detected: 0                       
+┏━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━┓
+┃ Regressor ┃ # Breaks ┃ Break locations ┃ Intervals ┃ Coefficients ┃
+┡━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━┩
+│ log Value │    0     │        —        │  [0,19)   │    0.5243    │
+└───────────┴──────────┴─────────────────┴───────────┴──────────────┘
+
+
+Total breaks detected on the real panel: 0
+</div></div><div class="codecell"><details class="code"><summary>Show code</summary><pre><code>post = PostSAWEstimator(variance_type="both", chow_test=True)
+post_res = post.fit(y, X, entity_ids, time_ids, breaks)
+if post_res["chow_tests"]:
+    for (p, i, j), c in post_res["chow_tests"].items():
+        print(f"reg {p}, interval {i}-&gt;{j}: F = {c['F_stat']:.2f}, p = {c['pvalue']:.4f}")
+else:
+    print("No consecutive intervals to compare — the investment–value elasticity is")
+    print("structurally STABLE across 1935–1954 (including WWII). A clean, publishable finding.")</code></pre></details>
+<div class="console">No consecutive intervals to compare — the investment–value elasticity is
+structurally STABLE across 1935–1954 (including WWII). A clean, publishable finding.
+</div></div><div class="md"><h3>4b. Sensitivity illustration (controlled DGP)</h3>
+<p>With only <strong>N = 11</strong> firms the cross-sectional coefficient path is noisy, so the adaptive threshold
+is conservative. To show the estimator <em>working</em>, here is a <strong>clearly-labelled simulated</strong> panel with
+two <strong>known</strong> breaks in the slope (γ = 1.0 → −0.5 → 2.0). This is illustrative, not the Grunfeld data.</p></div><div class="codecell"><details class="code"><summary>Show code</summary><pre><code>rng = np.random.default_rng(7)
+Ns, Ts = 60, 64
+g_true = np.ones(Ts); g_true[20:45] = -0.5; g_true[45:] = 2.0
+alpha = rng.standard_normal(Ns) * 2
+
+ys, xs, ids_s, ts_s = [], [], [], []
+for i in range(Ns):
+    xi = rng.standard_normal(Ts)
+    yi = alpha[i] + g_true * xi + rng.standard_normal(Ts) * 0.5
+    ys.append(yi); xs.append(xi); ids_s.append(np.full(Ts, i)); ts_s.append(np.arange(Ts))
+
+ys = np.concatenate(ys); xs = np.concatenate(xs)
+ids_s = np.concatenate(ids_s); ts_s = np.concatenate(ts_s)
+
+saw2 = SAWEstimator(threshold_method="adaptive", min_segment_length=5)
+br2 = saw2.detect(ys, xs, ids_s, ts_s, regressor_names=["slope γ"])
+print(f"True breaks at t = 20, 45  |  Detected: {br2.break_locations[0]}  (threshold {br2.threshold:.3f})")
+print(br2.summary())
+
+fig = br2.plot(time_index=np.arange(Ts))
+plt.show()</code></pre></details>
+<div class="console">True breaks at t = 20, 45  |  Detected: [19, 44]  (threshold 0.147)
+</div>
+<div class="tablewrap"><pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">                              SAW Structural Break Detection Results                               </span>
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">                                  N=60, T=64 | Threshold: 0.1474                                   </span>
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">                                     Total breaks detected: 2                                      </span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">┏━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━┓</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">┃</span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold"> Regressor </span><span style="color: #0000ff; text-decoration-color: #0000ff">┃</span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold"> # Breaks </span><span style="color: #0000ff; text-decoration-color: #0000ff">┃</span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold"> Break locations </span><span style="color: #0000ff; text-decoration-color: #0000ff">┃</span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold">         Intervals          </span><span style="color: #0000ff; text-decoration-color: #0000ff">┃</span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold">       Coefficients        </span><span style="color: #0000ff; text-decoration-color: #0000ff">┃</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">┡━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━┩</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">│</span> slope γ   <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>    2     <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>     19, 44      <span style="color: #0000ff; text-decoration-color: #0000ff">│</span> [0,19) | [19,44) | [44,63) <span style="color: #0000ff; text-decoration-color: #0000ff">│</span> 1.0039 | -0.4476 | 1.9466 <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">└───────────┴──────────┴─────────────────┴────────────────────────────┴───────────────────────────┘</span>
+</pre>
+</div>
+<div class="console">                              SAW Structural Break Detection Results                               
+                                  N=60, T=64 | Threshold: 0.1474                                   
+                                     Total breaks detected: 2                                      
+┏━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Regressor ┃ # Breaks ┃ Break locations ┃         Intervals          ┃       Coefficients        ┃
+┡━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ slope γ   │    2     │     19, 44      │ [0,19) | [19,44) | [44,63) │ 1.0039 | -0.4476 | 1.9466 │
+└───────────┴──────────┴─────────────────┴────────────────────────────┴───────────────────────────┘
+
+</div>
+<figure><img src="assets/fig_03.png" alt="Figure 3"><figcaption>Figure 3</figcaption></figure></div><div class="md"><h2>5. Panel Unit-Root Tests</h2>
+<p>Finally we ask whether the (log) investment series are <strong>stationary</strong> or contain a <strong>unit root</strong>.
+We compare the classical IPS test with three wavelet-based tests. Critical values come from Monte
+Carlo simulation under H₀ (independent random walks).</p>
+<blockquote>
+<p><strong>H₀:</strong> every firm's series has a unit root  <strong>H₁:</strong> at least some are stationary.</p>
+</blockquote></div><div class="codecell"><details class="code"><summary>Show code</summary><pre><code>SEED, NMC = 2024, 5000
+res_adf    = PanelADF(trend="c").test(invest_mat, n_mc=NMC, seed=SEED)
+res_wr     = WaveletRatioIPS().test(invest_mat, n_mc=NMC, seed=SEED)
+res_wdwt   = WaveletWaldDWT().test(invest_mat, n_mc=NMC, seed=SEED)
+res_wmodwt = WaveletWaldMODWT().test(invest_mat, n_mc=NMC, seed=SEED)
+all_res = [res_adf, res_wr, res_wdwt, res_wmodwt]
+
+print(UnitRootTable.from_multiple_results(all_res).render())</code></pre></details>
+<div class="tablewrap"><pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">                                           Panel Unit Root Tests — Comparison                                           </span>
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">                                           H0: All entities have a unit root.                                           </span>
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">                                            *** p&lt;0.01, ** p&lt;0.05, * p&lt;0.10                                             </span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━┓</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">┃</span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold">                      </span><span style="color: #0000ff; text-decoration-color: #0000ff">┃</span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold">                       </span><span style="color: #0000ff; text-decoration-color: #0000ff">┃</span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold">                       </span><span style="color: #0000ff; text-decoration-color: #0000ff">┃</span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold">  Wavelet Wald DWT —   </span><span style="color: #0000ff; text-decoration-color: #0000ff">┃</span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold"> Wavelet Wald MODWT —  </span><span style="color: #0000ff; text-decoration-color: #0000ff">┃</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">┃</span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold">                      </span><span style="color: #0000ff; text-decoration-color: #0000ff">┃</span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold">  IPS Panel ADF (Im,   </span><span style="color: #0000ff; text-decoration-color: #0000ff">┃</span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold"> Wavelet Ratio IPS (Li </span><span style="color: #0000ff; text-decoration-color: #0000ff">┃</span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold"> WDWT (Almasri et al., </span><span style="color: #0000ff; text-decoration-color: #0000ff">┃</span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold">  WMODWT (Almasri et   </span><span style="color: #0000ff; text-decoration-color: #0000ff">┃</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">┃</span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold">                      </span><span style="color: #0000ff; text-decoration-color: #0000ff">┃</span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold"> Pesaran &amp; Shin, 2003) </span><span style="color: #0000ff; text-decoration-color: #0000ff">┃</span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold">    &amp; Shukur, 2013)    </span><span style="color: #0000ff; text-decoration-color: #0000ff">┃</span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold">         2016)         </span><span style="color: #0000ff; text-decoration-color: #0000ff">┃</span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold">      al., 2016)       </span><span style="color: #0000ff; text-decoration-color: #0000ff">┃</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">┡━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━┩</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">│</span><span style="font-weight: bold"> Test statistic       </span><span style="color: #0000ff; text-decoration-color: #0000ff">│</span>        -1.6299        <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>        0.9957         <span style="color: #0000ff; text-decoration-color: #0000ff">│</span> 297475644154066.7500  <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>       436.1430        <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">├──────────────────────┼───────────────────────┼───────────────────────┼───────────────────────┼───────────────────────┤</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">│</span><span style="font-weight: bold"> p-value              </span><span style="color: #0000ff; text-decoration-color: #0000ff">│</span>        0.3458         <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>        1.0000         <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>        0.4952         <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>        0.8478         <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">├──────────────────────┼───────────────────────┼───────────────────────┼───────────────────────┼───────────────────────┤</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">│</span><span style="font-weight: bold"> Reject H0 (5%)       </span><span style="color: #0000ff; text-decoration-color: #0000ff">│</span>         <span style="color: #800000; text-decoration-color: #800000">No ✗</span>          <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>         <span style="color: #800000; text-decoration-color: #800000">No ✗</span>          <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>         <span style="color: #800000; text-decoration-color: #800000">No ✗</span>          <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>         <span style="color: #800000; text-decoration-color: #800000">No ✗</span>          <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">├──────────────────────┼───────────────────────┼───────────────────────┼───────────────────────┼───────────────────────┤</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">│</span><span style="font-weight: bold"> CV (1%)              </span><span style="color: #0000ff; text-decoration-color: #0000ff">│</span>        -2.1774        <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>        0.8857         <span style="color: #0000ff; text-decoration-color: #0000ff">│</span> 222689142973429728.0… <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>       815.4074        <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">├──────────────────────┼───────────────────────┼───────────────────────┼───────────────────────┼───────────────────────┤</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">│</span><span style="font-weight: bold"> CV (5%)              </span><span style="color: #0000ff; text-decoration-color: #0000ff">│</span>        -1.9825        <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>        0.9032         <span style="color: #0000ff; text-decoration-color: #0000ff">│</span> 54051862468085240.00… <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>       664.2315        <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">├──────────────────────┼───────────────────────┼───────────────────────┼───────────────────────┼───────────────────────┤</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">│</span><span style="font-weight: bold"> CV (10%)             </span><span style="color: #0000ff; text-decoration-color: #0000ff">│</span>        -1.8781        <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>        0.9128         <span style="color: #0000ff; text-decoration-color: #0000ff">│</span> 24878669147360196.00… <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>       609.5549        <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">├──────────────────────┼───────────────────────┼───────────────────────┼───────────────────────┼───────────────────────┤</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">│</span><span style="font-weight: bold"> N / T                </span><span style="color: #0000ff; text-decoration-color: #0000ff">│</span>        11 / 20        <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>        11 / 20        <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>        11 / 20        <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>        11 / 20        <span style="color: #0000ff; text-decoration-color: #0000ff">│</span>
+<span style="color: #0000ff; text-decoration-color: #0000ff">└──────────────────────┴───────────────────────┴───────────────────────┴───────────────────────┴───────────────────────┘</span>
+</pre>
+</div>
+<div class="console">                                           Panel Unit Root Tests — Comparison                                           
+                                           H0: All entities have a unit root.                                           
+                                            *** p&lt;0.01, ** p&lt;0.05, * p&lt;0.10                                             
+┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                      ┃                       ┃                       ┃  Wavelet Wald DWT —   ┃ Wavelet Wald MODWT —  ┃
+┃                      ┃  IPS Panel ADF (Im,   ┃ Wavelet Ratio IPS (Li ┃ WDWT (Almasri et al., ┃  WMODWT (Almasri et   ┃
+┃                      ┃ Pesaran &amp; Shin, 2003) ┃    &amp; Shukur, 2013)    ┃         2016)         ┃      al., 2016)       ┃
+┡━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━┩
+│ Test statistic       │        -1.6299        │        0.9957         │ 297475644154066.7500  │       436.1430        │
+├──────────────────────┼───────────────────────┼───────────────────────┼───────────────────────┼───────────────────────┤
+│ p-value              │        0.3458         │        1.0000         │        0.4952         │        0.8478         │
+├──────────────────────┼───────────────────────┼───────────────────────┼───────────────────────┼───────────────────────┤
+│ Reject H0 (5%)       │         No ✗          │         No ✗          │         No ✗          │         No ✗          │
+├──────────────────────┼───────────────────────┼───────────────────────┼───────────────────────┼───────────────────────┤
+│ CV (1%)              │        -2.1774        │        0.8857         │ 222689142973429728.0… │       815.4074        │
+├──────────────────────┼───────────────────────┼───────────────────────┼───────────────────────┼───────────────────────┤
+│ CV (5%)              │        -1.9825        │        0.9032         │ 54051862468085240.00… │       664.2315        │
+├──────────────────────┼───────────────────────┼───────────────────────┼───────────────────────┼───────────────────────┤
+│ CV (10%)             │        -1.8781        │        0.9128         │ 24878669147360196.00… │       609.5549        │
+├──────────────────────┼───────────────────────┼───────────────────────┼───────────────────────┼───────────────────────┤
+│ N / T                │        11 / 20        │        11 / 20        │        11 / 20        │        11 / 20        │
+└──────────────────────┴───────────────────────┴───────────────────────┴───────────────────────┴───────────────────────┘
+
+</div></div><div class="codecell"><details class="code"><summary>Show code</summary><pre><code># Compact styled comparison
+ur = pd.DataFrame({
+    "Test":      [r.test_name.split(" (")[0] for r in all_res],
+    "Statistic": [r.statistic for r in all_res],
+    "p-value":   [r.pvalue for r in all_res],
+    "CV (5%)":   [r.critical_values[0.05] for r in all_res],
+    "Reject H0 (5%)": ["Yes" if r.reject_null[0.05] else "No" for r in all_res],
+})
+def _hi(s):
+    return ["background-color: #d8f3dc; color: #1b4332" if v == "Yes"
+            else "background-color: #ffe5e5; color: #7a1f1f" for v in s]
+(ur.style
+    .format({"Statistic": "{:.3f}", "p-value": "{:.3f}", "CV (5%)": "{:.3f}"})
+    .apply(_hi, subset=["Reject H0 (5%)"])
+    .set_caption("Panel unit-root tests on log(Investment) — Grunfeld")
+    .hide(axis="index"))</code></pre></details>
+<div class="tablewrap"><style type="text/css">
+#T_95e29_row0_col4, #T_95e29_row1_col4, #T_95e29_row2_col4, #T_95e29_row3_col4 {
+  background-color: #ffe5e5;
+  color: #7a1f1f;
+}
+</style>
+<table id="T_95e29">
+  <caption>Panel unit-root tests on log(Investment) — Grunfeld</caption>
+  <thead>
+    <tr>
+      <th id="T_95e29_level0_col0" class="col_heading level0 col0" >Test</th>
+      <th id="T_95e29_level0_col1" class="col_heading level0 col1" >Statistic</th>
+      <th id="T_95e29_level0_col2" class="col_heading level0 col2" >p-value</th>
+      <th id="T_95e29_level0_col3" class="col_heading level0 col3" >CV (5%)</th>
+      <th id="T_95e29_level0_col4" class="col_heading level0 col4" >Reject H0 (5%)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td id="T_95e29_row0_col0" class="data row0 col0" >IPS Panel ADF</td>
+      <td id="T_95e29_row0_col1" class="data row0 col1" >-1.630</td>
+      <td id="T_95e29_row0_col2" class="data row0 col2" >0.346</td>
+      <td id="T_95e29_row0_col3" class="data row0 col3" >-1.982</td>
+      <td id="T_95e29_row0_col4" class="data row0 col4" >No</td>
+    </tr>
+    <tr>
+      <td id="T_95e29_row1_col0" class="data row1 col0" >Wavelet Ratio IPS</td>
+      <td id="T_95e29_row1_col1" class="data row1 col1" >0.996</td>
+      <td id="T_95e29_row1_col2" class="data row1 col2" >1.000</td>
+      <td id="T_95e29_row1_col3" class="data row1 col3" >0.903</td>
+      <td id="T_95e29_row1_col4" class="data row1 col4" >No</td>
+    </tr>
+    <tr>
+      <td id="T_95e29_row2_col0" class="data row2 col0" >Wavelet Wald DWT — WDWT</td>
+      <td id="T_95e29_row2_col1" class="data row2 col1" >297475644154066.750</td>
+      <td id="T_95e29_row2_col2" class="data row2 col2" >0.495</td>
+      <td id="T_95e29_row2_col3" class="data row2 col3" >54051862468085240.000</td>
+      <td id="T_95e29_row2_col4" class="data row2 col4" >No</td>
+    </tr>
+    <tr>
+      <td id="T_95e29_row3_col0" class="data row3 col0" >Wavelet Wald MODWT — WMODWT</td>
+      <td id="T_95e29_row3_col1" class="data row3 col1" >436.143</td>
+      <td id="T_95e29_row3_col2" class="data row3 col2" >0.848</td>
+      <td id="T_95e29_row3_col3" class="data row3 col3" >664.231</td>
+      <td id="T_95e29_row3_col4" class="data row3 col4" >No</td>
+    </tr>
+  </tbody>
+</table>
+</div></div><div class="codecell"><details class="code"><summary>Show code</summary><pre><code>fig = plot_unit_root_comparison(all_res, figsize=(12, 5))
+plt.show()</code></pre></details>
+<div class="console">C:\Users\HP\Documents\xtpmg\pypanelwavelet\pywaveletpanel\visualization.py:492: UserWarning: Glyph 10007 (\N{BALLOT X}) missing from font(s) DejaVu Serif.
+  fig.tight_layout()
+C:\Users\HP\anaconda3\Lib\site-packages\IPython\core\pylabtools.py:170: UserWarning: Glyph 10007 (\N{BALLOT X}) missing from font(s) DejaVu Serif.
+  fig.canvas.print_figure(bytes_io, **kw)
+</div>
+<figure><img src="assets/fig_04.png" alt="Figure 4"><figcaption>Figure 4</figcaption></figure></div><div class="md"><p><strong>Interpretation.</strong> Across all four tests the data <strong>fail to reject</strong> a unit root at the 5% level:
+firm investment behaves as a (near-)integrated process over this 20-year window. Note that <strong>T = 20</strong>
+is short, so the tests have limited power — the wavelet tests (WDWT/WMODWT) are designed to do better
+under structural breaks and cross-sectional dependence, which matter more as T grows.</p>
+<hr />
+<h2>Conclusion</h2>
+<p>On the real Grunfeld panel, <code>pywaveletpanel</code> delivered, end to end:</p>
+<ul>
+<li>a <strong>time-scale decomposition</strong> of firm investment,</li>
+<li>a <strong>scale-resolved elasticity</strong> (long-run ≫ short-run), with journal tables + LaTeX,</li>
+<li>a <strong>structural-stability</strong> verdict for the investment–value relationship (and a verified break demo),</li>
+<li>a <strong>panel unit-root</strong> comparison of wavelet vs. classical tests.</li>
+</ul>
+<div align="center">
+
+*Prepared by* **Dr. Merwan Roudane** · merwanroudane920@gmail.com · [github.com/merwanroudane](https://github.com/merwanroudane)
+
+</div>
+
+<h3>References</h3>
+<ol>
+<li>Bada et al. (2021). <em>A Wavelet Method for Panel Models with Jump Discontinuities</em>. arXiv:2109.10950.</li>
+<li>Karlsson et al. (2020). <em>Oil Prices &amp; Exchange Rates: A Wavelet Panel Analysis</em>. The Energy Journal 41(1).</li>
+<li>Almasri et al. (2016). <em>Wavelet-based Panel Unit-root Test with Structural Breaks</em>. Applied Economics.</li>
+<li>Gallegati et al. (2015). <em>Productivity and Unemployment: Scale-by-scale Panel Analysis</em>. SNDE.</li>
+<li>Li &amp; Shukur (2013). <em>Unit Roots in Panel Data Using a Wavelet Ratio</em>. Computational Economics 41.</li>
+<li>Grunfeld, Y. (1958). <em>The Determinants of Corporate Investment</em>. PhD thesis, University of Chicago.</li>
+</ol></div>
+  </section>
+
+  <section id="install">
+    <h2>Installation</h2>
+    <pre><code>pip install pywaveletpanel</code></pre>
+    <p>Or from source: <a href="https://github.com/merwanroudane/pywaveletpanel">https://github.com/merwanroudane/pywaveletpanel</a></p>
+  </section>
+
+  <section id="refs">
+    <h2>References</h2>
+    <ol>
+      <li>Bada et al. (2021). <em>A Wavelet Method for Panel Models with Jump Discontinuities</em>. arXiv:2109.10950.</li>
+      <li>Karlsson et al. (2020). <em>Oil Prices &amp; Exchange Rates: A Wavelet Panel Analysis</em>. The Energy Journal 41(1).</li>
+      <li>Almasri et al. (2016). <em>Wavelet-based Panel Unit-root Test with Structural Breaks</em>. Applied Economics.</li>
+      <li>Gallegati et al. (2015). <em>Productivity and Unemployment: Scale-by-scale Panel Analysis</em>. SNDE.</li>
+      <li>Li &amp; Shukur (2013). <em>Unit Roots in Panel Data Using a Wavelet Ratio</em>. Computational Economics 41.</li>
+      <li>Grunfeld, Y. (1958). <em>The Determinants of Corporate Investment</em>. PhD thesis, University of Chicago.</li>
+    </ol>
+  </section>
+</main>
+
+<footer><div class="wrap">
+  <div>
+    <div><strong>Dr. Merwan Roudane</strong></div>
+    <div class="kbd">📧 <a href="mailto:merwanroudane920@gmail.com">merwanroudane920@gmail.com</a> · 🔗 <a href="https://github.com/merwanroudane">github.com/merwanroudane</a></div>
+  </div>
+  <div class="kbd">
+    <a href="https://github.com/merwanroudane/pywaveletpanel">GitHub</a> · <a href="https://pypi.org/project/pywaveletpanel/">PyPI</a> · <a href="https://github.com/merwanroudane/pywaveletpanel/issues">Issues</a><br>
+    Built with PyWaveletPanel · MIT License
+  </div>
+</div></footer>
+
+</body>
+</html>

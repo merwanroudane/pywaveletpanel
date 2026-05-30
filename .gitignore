@@ -14,9 +14,10 @@ env/
 # Jupyter
 .ipynb_checkpoints/
 
-# Editor / OS
+# Editor / OS / local tooling
 .vscode/
 .idea/
+.claude/
 .DS_Store
 Thumbs.db
 
