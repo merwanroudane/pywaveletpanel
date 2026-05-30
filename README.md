@@ -4,9 +4,11 @@
     <strong>Wavelet-Based Panel Data Econometrics in Python</strong>
   </p>
   <p align="center">
+    <a href="https://pypi.org/project/pywaveletpanel/"><img src="https://img.shields.io/pypi/v/pywaveletpanel.svg?color=blue" alt="PyPI version"></a>
     <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.9+-blue.svg" alt="Python 3.9+"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="MIT License"></a>
     <a href="https://github.com/merwanroudane/pywaveletpanel"><img src="https://img.shields.io/badge/GitHub-Repository-black.svg" alt="GitHub"></a>
+    <a href="https://pypi.org/project/pywaveletpanel/"><img src="https://img.shields.io/pypi/dm/pywaveletpanel.svg?color=brightgreen" alt="PyPI downloads"></a>
   </p>
 </p>
 
@@ -47,6 +49,14 @@ This document is a **complete usage guide with full syntax** for every public fu
 | 5 | **Li & Shukur (2013)** — *Testing for Unit Roots in Panel Data Using Wavelet Ratio* | Wavelet Ratio IPS | `unit_root` |
 
 ## 🚀 Installation
+
+Install the latest release from [PyPI](https://pypi.org/project/pywaveletpanel/):
+
+```bash
+pip install pywaveletpanel
+```
+
+Or install from source for development:
 
 ```bash
 git clone https://github.com/merwanroudane/pywaveletpanel.git
