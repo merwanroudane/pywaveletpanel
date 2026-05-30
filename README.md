@@ -16,6 +16,8 @@
 
 This document is a **complete usage guide with full syntax** for every public function and class.
 
+**Links:** [GitHub Repository](https://github.com/merwanroudane/pywaveletpanel) · [PyPI](https://pypi.org/project/pywaveletpanel/) · [Issue Tracker](https://github.com/merwanroudane/pywaveletpanel/issues)
+
 ## 📚 Table of Contents
 
 - [Implemented Papers](#-implemented-papers)

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pywaveletpanel"
-version = "0.1.0"
+version = "0.1.1"
 description = "Wavelet-based panel data econometrics: structural breaks, scale-by-scale regression, and unit root testing."
 readme = "README.md"
 license = {text = "MIT"}
@@ -42,6 +42,7 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/merwanroudane/pywaveletpanel"
+Source = "https://github.com/merwanroudane/pywaveletpanel"
 Repository = "https://github.com/merwanroudane/pywaveletpanel"
 Issues = "https://github.com/merwanroudane/pywaveletpanel/issues"
 Documentation = "https://github.com/merwanroudane/pywaveletpanel#readme"
